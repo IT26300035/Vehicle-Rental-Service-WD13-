@@ -1,5 +1,6 @@
 package com.rental.vehiclemanagement.controller;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.List;
 import com.rental.vehiclemanagement.dto.VehicleRequest;
 import com.rental.vehiclemanagement.dto.VehicleResponse;
 import com.rental.vehiclemanagement.service.VehicleService;
@@ -32,5 +33,11 @@ public class VehicleController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+
+        @GetMapping
+        public ResponseEntity<List<VehicleResponse>> getAllVehicles() {
+
+            return ResponseEntity.ok(vehicleService.getAllVehicles());
+        }
     }
 }

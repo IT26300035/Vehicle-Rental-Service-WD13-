@@ -1,5 +1,5 @@
 package com.rental.vehiclemanagement.service;
-
+import java.util.List;
 import com.rental.vehiclemanagement.dto.VehicleRequest;
 import com.rental.vehiclemanagement.dto.VehicleResponse;
 import com.rental.vehiclemanagement.entity.Vehicle;
@@ -59,5 +59,22 @@ public class VehicleService {
                 savedVehicle.getDailyRate(),
                 savedVehicle.isAvailable()
         );
+
+        @Transactional(readOnly = true)
+        public List<VehicleResponse> getAllVehicles() {
+
+            return vehicleRepository.findAll()
+                    .stream()
+                    .map(vehicle -> new VehicleResponse(
+                            vehicle.getId(),
+                            vehicle.getRegistrationNumber(),
+                            vehicle.getBrand(),
+                            vehicle.getModel(),
+                            vehicle.getCategory(),
+                            vehicle.getDailyRate(),
+                            vehicle.isAvailable()
+                    ))
+                    .toList();
+        }
     }
 }
