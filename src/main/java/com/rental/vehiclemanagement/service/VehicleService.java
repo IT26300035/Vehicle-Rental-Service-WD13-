@@ -59,7 +59,7 @@ public class VehicleService {
                 savedVehicle.getDailyRate(),
                 savedVehicle.isAvailable()
         );
-
+import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
         @Transactional(readOnly = true)
         public List<VehicleResponse> getAllVehicles() {
 
@@ -75,6 +75,23 @@ public class VehicleService {
                             vehicle.isAvailable()
                     ))
                     .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public VehicleResponse getVehicleById(Long id) {
+
+            Vehicle vehicle = vehicleRepository.findById(id)
+                    .orElseThrow(() -> new VehicleNotFoundException(id));
+
+            return new VehicleResponse(
+                    vehicle.getId(),
+                    vehicle.getRegistrationNumber(),
+                    vehicle.getBrand(),
+                    vehicle.getModel(),
+                    vehicle.getCategory(),
+                    vehicle.getDailyRate(),
+                    vehicle.isAvailable()
+            );
         }
     }
 }

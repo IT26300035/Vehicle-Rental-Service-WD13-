@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @RequestMapping("/api/vehicles")
 public class VehicleController {
@@ -39,5 +39,12 @@ public class VehicleController {
 
             return ResponseEntity.ok(vehicleService.getAllVehicles());
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<VehicleResponse> getVehicleById(
+            @PathVariable("id") Long id) {
+
+        return ResponseEntity.ok(vehicleService.getVehicleById(id));
     }
 }
