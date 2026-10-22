@@ -47,4 +47,14 @@ public class VehicleController {
 
         return ResponseEntity.ok(vehicleService.getVehicleById(id));
     }
+
+    import org.springframework.web.bind.annotation.PutMapping;
+
+    @PutMapping("/{id}")
+    public ResponseEntity<VehicleResponse> updateVehicle(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody VehicleRequest request) {
+
+        return ResponseEntity.ok(vehicleService.updateVehicle(id, request));
+    }
 }

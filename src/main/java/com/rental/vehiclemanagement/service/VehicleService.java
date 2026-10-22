@@ -92,6 +92,45 @@ import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
                     vehicle.getDailyRate(),
                     vehicle.isAvailable()
             );
+
+            @Transactional
+            public VehicleResponse updateVehicle(Long id, @Valid VehicleRequest request) {
+
+                Vehicle vehicle = vehicleRepository.findById(id)
+                        .orElseThrow(() -> new VehicleNotFoundException(id));
+
+                String registrationNumber = request.registrationNumber()
+                        .trim()
+                        .toUpperCase(Locale.ROOT);
+
+                if (!vehicle.getRegistrationNumber().equals(registrationNumber)
+                        && vehicleRepository.existsByRegistrationNumber(registrationNumber)) {
+
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "A vehicle with this registration number already exists"
+                    );
+                }
+
+                vehicle.setRegistrationNumber(registrationNumber);
+                vehicle.setBrand(request.brand().trim());
+                vehicle.setModel(request.model().trim());
+                vehicle.setCategory(request.category().trim());
+                vehicle.setDailyRate(request.dailyRate());
+                vehicle.setAvailable(request.available());
+
+                Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+
+                return new VehicleResponse(
+                        updatedVehicle.getId(),
+                        updatedVehicle.getRegistrationNumber(),
+                        updatedVehicle.getBrand(),
+                        updatedVehicle.getModel(),
+                        updatedVehicle.getCategory(),
+                        updatedVehicle.getDailyRate(),
+                        updatedVehicle.isAvailable()
+                );
+            }
         }
     }
 }
