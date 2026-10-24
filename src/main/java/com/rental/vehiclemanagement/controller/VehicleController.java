@@ -57,4 +57,14 @@ public class VehicleController {
 
         return ResponseEntity.ok(vehicleService.updateVehicle(id, request));
     }
+    import org.springframework.web.bind.annotation.DeleteMapping;
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVehicle(
+            @PathVariable("id") Long id) {
+
+        vehicleService.deleteVehicle(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

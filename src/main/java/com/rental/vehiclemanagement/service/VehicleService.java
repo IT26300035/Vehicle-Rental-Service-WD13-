@@ -133,4 +133,12 @@ import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
             }
         }
     }
+    @Transactional
+    public void deleteVehicle(Long id) {
+
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException(id));
+
+        vehicleRepository.delete(vehicle);
+    }
 }
