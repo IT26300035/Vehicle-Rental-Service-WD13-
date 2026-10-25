@@ -1,8 +1,10 @@
+
 package com.rental.vehiclemanagement.service;
-import java.util.List;
+
 import com.rental.vehiclemanagement.dto.VehicleRequest;
 import com.rental.vehiclemanagement.dto.VehicleResponse;
 import com.rental.vehiclemanagement.entity.Vehicle;
+import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
 import com.rental.vehiclemanagement.repository.VehicleRepository;
 
 import jakarta.validation.Valid;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -25,6 +28,7 @@ public class VehicleService {
         this.vehicleRepository = vehicleRepository;
     }
 
+    // Day 7 - Add Vehicle
     @Transactional
     public VehicleResponse addVehicle(@Valid VehicleRequest request) {
 
@@ -59,80 +63,85 @@ public class VehicleService {
                 savedVehicle.getDailyRate(),
                 savedVehicle.isAvailable()
         );
-import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
-        @Transactional(readOnly = true)
-        public List<VehicleResponse> getAllVehicles() {
-
-            return vehicleRepository.findAll()
-                    .stream()
-                    .map(vehicle -> new VehicleResponse(
-                            vehicle.getId(),
-                            vehicle.getRegistrationNumber(),
-                            vehicle.getBrand(),
-                            vehicle.getModel(),
-                            vehicle.getCategory(),
-                            vehicle.getDailyRate(),
-                            vehicle.isAvailable()
-                    ))
-                    .toList();
-        }
-
-        @Transactional(readOnly = true)
-        public VehicleResponse getVehicleById(Long id) {
-
-            Vehicle vehicle = vehicleRepository.findById(id)
-                    .orElseThrow(() -> new VehicleNotFoundException(id));
-
-            return new VehicleResponse(
-                    vehicle.getId(),
-                    vehicle.getRegistrationNumber(),
-                    vehicle.getBrand(),
-                    vehicle.getModel(),
-                    vehicle.getCategory(),
-                    vehicle.getDailyRate(),
-                    vehicle.isAvailable()
-            );
-
-            @Transactional
-            public VehicleResponse updateVehicle(Long id, @Valid VehicleRequest request) {
-
-                Vehicle vehicle = vehicleRepository.findById(id)
-                        .orElseThrow(() -> new VehicleNotFoundException(id));
-
-                String registrationNumber = request.registrationNumber()
-                        .trim()
-                        .toUpperCase(Locale.ROOT);
-
-                if (!vehicle.getRegistrationNumber().equals(registrationNumber)
-                        && vehicleRepository.existsByRegistrationNumber(registrationNumber)) {
-
-                    throw new ResponseStatusException(
-                            HttpStatus.CONFLICT,
-                            "A vehicle with this registration number already exists"
-                    );
-                }
-
-                vehicle.setRegistrationNumber(registrationNumber);
-                vehicle.setBrand(request.brand().trim());
-                vehicle.setModel(request.model().trim());
-                vehicle.setCategory(request.category().trim());
-                vehicle.setDailyRate(request.dailyRate());
-                vehicle.setAvailable(request.available());
-
-                Vehicle updatedVehicle = vehicleRepository.save(vehicle);
-
-                return new VehicleResponse(
-                        updatedVehicle.getId(),
-                        updatedVehicle.getRegistrationNumber(),
-                        updatedVehicle.getBrand(),
-                        updatedVehicle.getModel(),
-                        updatedVehicle.getCategory(),
-                        updatedVehicle.getDailyRate(),
-                        updatedVehicle.isAvailable()
-                );
-            }
-        }
     }
+
+    // Day 9 - Get All Vehicles
+    @Transactional(readOnly = true)
+    public List<VehicleResponse> getAllVehicles() {
+
+        return vehicleRepository.findAll()
+                .stream()
+                .map(vehicle -> new VehicleResponse(
+                        vehicle.getId(),
+                        vehicle.getRegistrationNumber(),
+                        vehicle.getBrand(),
+                        vehicle.getModel(),
+                        vehicle.getCategory(),
+                        vehicle.getDailyRate(),
+                        vehicle.isAvailable()
+                ))
+                .toList();
+    }
+
+    // Day 10 - Get Vehicle By ID
+    @Transactional(readOnly = true)
+    public VehicleResponse getVehicleById(Long id) {
+
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException(id));
+
+        return new VehicleResponse(
+                vehicle.getId(),
+                vehicle.getRegistrationNumber(),
+                vehicle.getBrand(),
+                vehicle.getModel(),
+                vehicle.getCategory(),
+                vehicle.getDailyRate(),
+                vehicle.isAvailable()
+        );
+    }
+
+    // Day 11 - Update Vehicle
+    @Transactional
+    public VehicleResponse updateVehicle(Long id, @Valid VehicleRequest request) {
+
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException(id));
+
+        String registrationNumber = request.registrationNumber()
+                .trim()
+                .toUpperCase(Locale.ROOT);
+
+        if (!vehicle.getRegistrationNumber().equals(registrationNumber)
+                && vehicleRepository.existsByRegistrationNumber(registrationNumber)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "A vehicle with this registration number already exists"
+            );
+        }
+
+        vehicle.setRegistrationNumber(registrationNumber);
+        vehicle.setBrand(request.brand().trim());
+        vehicle.setModel(request.model().trim());
+        vehicle.setCategory(request.category().trim());
+        vehicle.setDailyRate(request.dailyRate());
+        vehicle.setAvailable(request.available());
+
+        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+
+        return new VehicleResponse(
+                updatedVehicle.getId(),
+                updatedVehicle.getRegistrationNumber(),
+                updatedVehicle.getBrand(),
+                updatedVehicle.getModel(),
+                updatedVehicle.getCategory(),
+                updatedVehicle.getDailyRate(),
+                updatedVehicle.isAvailable()
+        );
+    }
+
+    // Day 12 - Delete Vehicle
     @Transactional
     public void deleteVehicle(Long id) {
 
@@ -140,5 +149,32 @@ import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
                 .orElseThrow(() -> new VehicleNotFoundException(id));
 
         vehicleRepository.delete(vehicle);
+    }
+
+    // Day 14 - Search and Filter Vehicles
+    @Transactional(readOnly = true)
+    public List<VehicleResponse> searchVehicles(
+            String brand,
+            String category,
+            Boolean available) {
+
+        brand = (brand == null || brand.isBlank())
+                ? null : brand.trim();
+
+        category = (category == null || category.isBlank())
+                ? null : category.trim();
+
+        return vehicleRepository.searchVehicles(brand, category, available)
+                .stream()
+                .map(vehicle -> new VehicleResponse(
+                        vehicle.getId(),
+                        vehicle.getRegistrationNumber(),
+                        vehicle.getBrand(),
+                        vehicle.getModel(),
+                        vehicle.getCategory(),
+                        vehicle.getDailyRate(),
+                        vehicle.isAvailable()
+                ))
+                .toList();
     }
 }
