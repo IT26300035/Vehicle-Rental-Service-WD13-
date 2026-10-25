@@ -9,6 +9,10 @@ import com.rental.vehiclemanagement.repository.VehicleRepository;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -176,5 +180,58 @@ public class VehicleService {
                         vehicle.isAvailable()
                 ))
                 .toList();
+    }
+
+    // Day 15 - Pagination and Sorting
+    @Transactional(readOnly = true)
+    public Page<VehicleResponse> getPagedVehicles(
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
+
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Page must be >= 0 and size must be between 1 and 100"
+            );
+        }
+
+        if (!List.of("id", "registrationNumber", "brand",
+                        "model", "category", "dailyRate", "available")
+                .contains(sortBy)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid sorting field"
+            );
+        }
+
+        Sort.Direction sortDirection;
+
+        try {
+            sortDirection = Sort.Direction.fromString(direction);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Sort direction must be asc or desc"
+            );
+        }
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(sortDirection, sortBy)
+        );
+
+        return vehicleRepository.findAll(pageable)
+                .map(vehicle -> new VehicleResponse(
+                        vehicle.getId(),
+                        vehicle.getRegistrationNumber(),
+                        vehicle.getBrand(),
+                        vehicle.getModel(),
+                        vehicle.getCategory(),
+                        vehicle.getDailyRate(),
+                        vehicle.isAvailable()
+                ));
     }
 }
