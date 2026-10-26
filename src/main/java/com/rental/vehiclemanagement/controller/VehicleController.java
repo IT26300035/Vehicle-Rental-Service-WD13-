@@ -3,6 +3,8 @@ package com.rental.vehiclemanagement.controller;
 
 import com.rental.vehiclemanagement.dto.VehicleRequest;
 import com.rental.vehiclemanagement.dto.VehicleResponse;
+import com.rental.vehiclemanagement.dto.VehicleAvailabilityRequest;
+import com.rental.vehiclemanagement.dto.VehicleStatisticsResponse;
 import com.rental.vehiclemanagement.service.VehicleService;
 
 import jakarta.validation.Valid;
@@ -10,8 +12,10 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -65,7 +69,9 @@ public class VehicleController {
             @PathVariable("id") Long id,
             @Valid @RequestBody VehicleRequest request) {
 
-        return ResponseEntity.ok(vehicleService.updateVehicle(id, request));
+        return ResponseEntity.ok(
+                vehicleService.updateVehicle(id, request)
+        );
     }
 
     // Day 12 - Delete Vehicle
@@ -86,7 +92,9 @@ public class VehicleController {
             @RequestParam(required = false) Boolean available) {
 
         return ResponseEntity.ok(
-                vehicleService.searchVehicles(brand, category, available)
+                vehicleService.searchVehicles(
+                        brand, category, available
+                )
         );
     }
 
@@ -102,6 +110,26 @@ public class VehicleController {
                 vehicleService.getPagedVehicles(
                         page, size, sortBy, direction
                 )
+        );
+    }
+
+    // Day 16 - Update Vehicle Availability
+    @PatchMapping("/{id}/availability")
+    public ResponseEntity<VehicleResponse> updateVehicleAvailability(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody VehicleAvailabilityRequest request) {
+
+        return ResponseEntity.ok(
+                vehicleService.updateVehicleAvailability(id, request)
+        );
+    }
+
+    // Day 17 - Get Vehicle Statistics
+    @GetMapping("/statistics")
+    public ResponseEntity<VehicleStatisticsResponse> getVehicleStatistics() {
+
+        return ResponseEntity.ok(
+                vehicleService.getVehicleStatistics()
         );
     }
 }
