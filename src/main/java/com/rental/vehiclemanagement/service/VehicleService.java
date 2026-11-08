@@ -3,6 +3,8 @@ package com.rental.vehiclemanagement.service;
 
 import com.rental.vehiclemanagement.dto.VehicleRequest;
 import com.rental.vehiclemanagement.dto.VehicleResponse;
+import com.rental.vehiclemanagement.dto.VehicleAvailabilityRequest;
+import com.rental.vehiclemanagement.dto.VehicleStatisticsResponse;
 import com.rental.vehiclemanagement.entity.Vehicle;
 import com.rental.vehiclemanagement.exception.VehicleNotFoundException;
 import com.rental.vehiclemanagement.repository.VehicleRepository;
@@ -58,15 +60,7 @@ public class VehicleService {
 
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
-        return new VehicleResponse(
-                savedVehicle.getId(),
-                savedVehicle.getRegistrationNumber(),
-                savedVehicle.getBrand(),
-                savedVehicle.getModel(),
-                savedVehicle.getCategory(),
-                savedVehicle.getDailyRate(),
-                savedVehicle.isAvailable()
-        );
+        return toResponse(savedVehicle);
     }
 
     // Day 9 - Get All Vehicles
@@ -75,15 +69,7 @@ public class VehicleService {
 
         return vehicleRepository.findAll()
                 .stream()
-                .map(vehicle -> new VehicleResponse(
-                        vehicle.getId(),
-                        vehicle.getRegistrationNumber(),
-                        vehicle.getBrand(),
-                        vehicle.getModel(),
-                        vehicle.getCategory(),
-                        vehicle.getDailyRate(),
-                        vehicle.isAvailable()
-                ))
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -94,20 +80,14 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException(id));
 
-        return new VehicleResponse(
-                vehicle.getId(),
-                vehicle.getRegistrationNumber(),
-                vehicle.getBrand(),
-                vehicle.getModel(),
-                vehicle.getCategory(),
-                vehicle.getDailyRate(),
-                vehicle.isAvailable()
-        );
+        return toResponse(vehicle);
     }
 
     // Day 11 - Update Vehicle
     @Transactional
-    public VehicleResponse updateVehicle(Long id, @Valid VehicleRequest request) {
+    public VehicleResponse updateVehicle(
+            Long id,
+            @Valid VehicleRequest request) {
 
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException(id));
@@ -134,15 +114,7 @@ public class VehicleService {
 
         Vehicle updatedVehicle = vehicleRepository.save(vehicle);
 
-        return new VehicleResponse(
-                updatedVehicle.getId(),
-                updatedVehicle.getRegistrationNumber(),
-                updatedVehicle.getBrand(),
-                updatedVehicle.getModel(),
-                updatedVehicle.getCategory(),
-                updatedVehicle.getDailyRate(),
-                updatedVehicle.isAvailable()
-        );
+        return toResponse(updatedVehicle);
     }
 
     // Day 12 - Delete Vehicle
@@ -170,15 +142,7 @@ public class VehicleService {
 
         return vehicleRepository.searchVehicles(brand, category, available)
                 .stream()
-                .map(vehicle -> new VehicleResponse(
-                        vehicle.getId(),
-                        vehicle.getRegistrationNumber(),
-                        vehicle.getBrand(),
-                        vehicle.getModel(),
-                        vehicle.getCategory(),
-                        vehicle.getDailyRate(),
-                        vehicle.isAvailable()
-                ))
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -200,6 +164,7 @@ public class VehicleService {
         if (!List.of("id", "registrationNumber", "brand",
                         "model", "category", "dailyRate", "available")
                 .contains(sortBy)) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Invalid sorting field"
@@ -224,14 +189,55 @@ public class VehicleService {
         );
 
         return vehicleRepository.findAll(pageable)
-                .map(vehicle -> new VehicleResponse(
-                        vehicle.getId(),
-                        vehicle.getRegistrationNumber(),
-                        vehicle.getBrand(),
-                        vehicle.getModel(),
-                        vehicle.getCategory(),
-                        vehicle.getDailyRate(),
-                        vehicle.isAvailable()
-                ));
+                .map(this::toResponse);
+    }
+
+    // Day 16 - Update Vehicle Availability
+    @Transactional
+    public VehicleResponse updateVehicleAvailability(
+            Long id,
+            @Valid VehicleAvailabilityRequest request) {
+
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException(id));
+
+        vehicle.setAvailable(request.available());
+
+        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+
+        return toResponse(updatedVehicle);
+    }
+
+    // Day 17 - Get Vehicle Statistics
+    @Transactional(readOnly = true)
+    public VehicleStatisticsResponse getVehicleStatistics() {
+
+        long totalVehicles = vehicleRepository.count();
+
+        long availableVehicles =
+                vehicleRepository.countByAvailable(true);
+
+        long unavailableVehicles =
+                vehicleRepository.countByAvailable(false);
+
+        return new VehicleStatisticsResponse(
+                totalVehicles,
+                availableVehicles,
+                unavailableVehicles
+        );
+    }
+
+    // Helper Method - Convert Vehicle to VehicleResponse
+    private VehicleResponse toResponse(Vehicle vehicle) {
+
+        return new VehicleResponse(
+                vehicle.getId(),
+                vehicle.getRegistrationNumber(),
+                vehicle.getBrand(),
+                vehicle.getModel(),
+                vehicle.getCategory(),
+                vehicle.getDailyRate(),
+                vehicle.isAvailable()
+        );
     }
 }

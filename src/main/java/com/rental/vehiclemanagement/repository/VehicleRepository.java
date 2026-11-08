@@ -1,3 +1,4 @@
+
 package com.rental.vehiclemanagement.repository;
 
 import com.rental.vehiclemanagement.entity.Vehicle;
@@ -11,10 +12,13 @@ import java.util.Optional;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
+    // Find vehicle by registration number
     Optional<Vehicle> findByRegistrationNumber(String registrationNumber);
 
+    // Check duplicate registration number
     boolean existsByRegistrationNumber(String registrationNumber);
 
+    // Day 14 - Search and Filter Vehicles
     @Query("""
            SELECT v FROM Vehicle v
            WHERE (:brand IS NULL OR
@@ -29,4 +33,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             @Param("category") String category,
             @Param("available") Boolean available
     );
+
+    // Day 17 - Vehicle Statistics
+    long countByAvailable(boolean available);
 }

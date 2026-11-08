@@ -1,4 +1,12 @@
+
 package com.rental.vehiclemanagement.dto;
 
-public class VehicleAvailabilityRequest {
+import jakarta.validation.constraints.NotNull;
+
+public record VehicleAvailabilityRequest(
+
+        @NotNull(message = "Availability is required")
+        Boolean available
+
+) {
 }
