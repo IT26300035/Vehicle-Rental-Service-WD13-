@@ -1,10 +1,254 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>RentFlow | Vehicle Management</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
 </head>
 <body>
-$END$
+
+<div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">RENT<span>FLOW</span></div>
+
+        <nav>
+            <a href="#dashboard" class="nav-link active">
+                Dashboard
+            </a>
+
+            <a href="#vehicles" class="nav-link">
+                Vehicles
+            </a>
+
+            <a href="#vehicleFormSection" class="nav-link">
+                Add Vehicle
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            Vehicle Management System
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="dashboard">
+
+        <!-- Header -->
+        <header class="topbar">
+
+            <div>
+                <p class="subtitle">
+                    RENTFLOW / FLEET CONTROL
+                </p>
+
+                <h1>Vehicle Management</h1>
+
+                <p class="description">
+                    Manage and monitor your rental vehicle fleet.
+                </p>
+            </div>
+
+            <div class="admin-badge">Admin Panel</div>
+
+        </header>
+
+        <!-- Statistics -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <p>Total Vehicles</p>
+                <h2 id="totalVehicles">0</h2>
+                <span>Vehicles in your fleet</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Available Vehicles</p>
+                <h2 id="availableVehicles">0</h2>
+                <span>Ready for rental</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Unavailable Vehicles</p>
+                <h2 id="unavailableVehicles">0</h2>
+                <span>Currently unavailable</span>
+            </div>
+
+        </section>
+
+        <!-- Add / Edit Vehicle Form -->
+        <section class="vehicle-section form-section"
+                 id="vehicleFormSection">
+
+            <div class="section-header">
+                <div>
+                    <h2 id="formTitle">Add New Vehicle</h2>
+                    <p>Enter vehicle information below</p>
+                </div>
+            </div>
+
+            <form id="vehicleForm">
+
+                <input type="hidden" id="vehicleId">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="registrationNumber">
+                            Registration Number
+                        </label>
+
+                        <input type="text"
+                               id="registrationNumber"
+                               maxlength="20"
+                               placeholder="ABC-1234"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brand">Brand</label>
+
+                        <input type="text"
+                               id="brand"
+                               maxlength="50"
+                               placeholder="Toyota"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model">Model</label>
+
+                        <input type="text"
+                               id="model"
+                               maxlength="50"
+                               placeholder="Corolla"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+
+                        <select id="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Van">Van</option>
+                            <option value="Luxury">Luxury</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dailyRate">
+                            Daily Rate (LKR)
+                        </label>
+
+                        <input type="number"
+                               id="dailyRate"
+                               min="0.01"
+                               max="9999999999.99"
+                               step="0.01"
+                               placeholder="8500.00"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="available">
+                            Availability
+                        </label>
+
+                        <select id="available" required>
+                            <option value="true">Available</option>
+                            <option value="false">Unavailable</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button type="submit"
+                            class="save-btn"
+                            id="saveBtn">
+                        Save Vehicle
+                    </button>
+
+                    <button type="button"
+                            class="cancel-btn"
+                            id="cancelBtn">
+                        Cancel
+                    </button>
+
+                </div>
+
+                <p id="formMessage"
+                   class="form-message"
+                   role="status"
+                   aria-live="polite"></p>
+
+            </form>
+        </section>
+
+        <!-- Vehicle Listing -->
+        <section class="vehicle-section" id="vehicles">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Vehicle Fleet</h2>
+                    <p>Manage all registered vehicles</p>
+                </div>
+
+                <button class="refresh-btn"
+                        id="refreshBtn"
+                        type="button">
+                    Refresh List
+                </button>
+
+            </div>
+
+            <p id="statusMessage"
+               role="status"
+               aria-live="polite"></p>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Registration</th>
+                        <th>Vehicle</th>
+                        <th>Category</th>
+                        <th>Daily Rate</th>
+                        <th>Availability</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="vehicleTableBody"></tbody>
+
+                </table>
+
+            </div>
+        </section>
+
+        <footer>
+            RentFlow Vehicle Management System
+        </footer>
+
+    </main>
+</div>
+
 </body>
 </html>
