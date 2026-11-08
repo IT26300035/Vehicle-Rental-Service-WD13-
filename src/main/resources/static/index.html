@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/app.js" defer></script>
 </head>
+
 <body>
 
 <div class="app-container">
@@ -18,7 +20,9 @@
     <!-- Sidebar -->
     <aside class="sidebar">
 
-        <div class="logo">RENT<span>FLOW</span></div>
+        <div class="logo">
+            RENT<span>FLOW</span>
+        </div>
 
         <nav>
             <a href="#dashboard" class="nav-link active">
@@ -40,6 +44,7 @@
 
     </aside>
 
+
     <!-- Main Content -->
     <main class="main-content" id="dashboard">
 
@@ -58,41 +63,56 @@
                 </p>
             </div>
 
-            <div class="admin-badge">Admin Panel</div>
+            <div class="admin-badge">
+                Admin Panel
+            </div>
 
         </header>
 
-        <!-- Statistics -->
+
+        <!-- Dashboard Statistics -->
         <section class="stats-grid">
 
             <div class="stat-card">
                 <p>Total Vehicles</p>
+
                 <h2 id="totalVehicles">0</h2>
+
                 <span>Vehicles in your fleet</span>
             </div>
 
             <div class="stat-card">
                 <p>Available Vehicles</p>
+
                 <h2 id="availableVehicles">0</h2>
+
                 <span>Ready for rental</span>
             </div>
 
             <div class="stat-card">
                 <p>Unavailable Vehicles</p>
+
                 <h2 id="unavailableVehicles">0</h2>
+
                 <span>Currently unavailable</span>
             </div>
 
         </section>
 
-        <!-- Add / Edit Vehicle Form -->
+
+        <!-- Day 22 - Add / Edit Vehicle Form -->
         <section class="vehicle-section form-section"
                  id="vehicleFormSection">
 
             <div class="section-header">
                 <div>
-                    <h2 id="formTitle">Add New Vehicle</h2>
-                    <p>Enter vehicle information below</p>
+                    <h2 id="formTitle">
+                        Add New Vehicle
+                    </h2>
+
+                    <p>
+                        Enter vehicle information below
+                    </p>
                 </div>
             </div>
 
@@ -102,7 +122,9 @@
 
                 <div class="form-grid">
 
+                    <!-- Registration Number -->
                     <div class="form-group">
+
                         <label for="registrationNumber">
                             Registration Number
                         </label>
@@ -112,42 +134,69 @@
                                maxlength="20"
                                placeholder="ABC-1234"
                                required>
+
                     </div>
 
+
+                    <!-- Brand -->
                     <div class="form-group">
-                        <label for="brand">Brand</label>
+
+                        <label for="brand">
+                            Brand
+                        </label>
 
                         <input type="text"
                                id="brand"
                                maxlength="50"
                                placeholder="Toyota"
                                required>
+
                     </div>
 
+
+                    <!-- Model -->
                     <div class="form-group">
-                        <label for="model">Model</label>
+
+                        <label for="model">
+                            Model
+                        </label>
 
                         <input type="text"
                                id="model"
                                maxlength="50"
                                placeholder="Corolla"
                                required>
+
                     </div>
 
+
+                    <!-- Category -->
                     <div class="form-group">
-                        <label for="category">Category</label>
+
+                        <label for="category">
+                            Category
+                        </label>
 
                         <select id="category" required>
-                            <option value="">Select Category</option>
+
+                            <option value="">
+                                Select Category
+                            </option>
+
                             <option value="Sedan">Sedan</option>
                             <option value="SUV">SUV</option>
                             <option value="Hatchback">Hatchback</option>
                             <option value="Van">Van</option>
                             <option value="Luxury">Luxury</option>
+
                         </select>
+
                     </div>
 
+
+                    <!-- Daily Rate -->
                     <div class="form-group">
+
                         <label for="dailyRate">
                             Daily Rate (LKR)
                         </label>
@@ -159,21 +208,35 @@
                                step="0.01"
                                placeholder="8500.00"
                                required>
+
                     </div>
 
+
+                    <!-- Availability -->
                     <div class="form-group">
+
                         <label for="available">
                             Availability
                         </label>
 
                         <select id="available" required>
-                            <option value="true">Available</option>
-                            <option value="false">Unavailable</option>
+
+                            <option value="true">
+                                Available
+                            </option>
+
+                            <option value="false">
+                                Unavailable
+                            </option>
+
                         </select>
+
                     </div>
 
                 </div>
 
+
+                <!-- Form Buttons -->
                 <div class="form-actions">
 
                     <button type="submit"
@@ -190,13 +253,18 @@
 
                 </div>
 
+
+                <!-- Form Messages -->
                 <p id="formMessage"
                    class="form-message"
                    role="status"
-                   aria-live="polite"></p>
+                   aria-live="polite">
+                </p>
 
             </form>
+
         </section>
+
 
         <!-- Vehicle Listing -->
         <section class="vehicle-section" id="vehicles">
@@ -205,21 +273,144 @@
 
                 <div>
                     <h2>Vehicle Fleet</h2>
-                    <p>Manage all registered vehicles</p>
+
+                    <p>
+                        Manage all registered vehicles
+                    </p>
                 </div>
 
-                <button class="refresh-btn"
-                        id="refreshBtn"
-                        type="button">
+                <button type="button"
+                        class="refresh-btn"
+                        id="refreshBtn">
                     Refresh List
                 </button>
 
             </div>
 
+
+            <!-- Day 23 - Search and Filters -->
+            <div class="filter-section">
+
+                <!-- Search -->
+                <div class="filter-group">
+
+                    <label for="searchInput">
+                        Search Vehicles
+                    </label>
+
+                    <input type="text"
+                           id="searchInput"
+                           placeholder="Brand, model or registration">
+
+                </div>
+
+
+                <!-- Category Filter -->
+                <div class="filter-group">
+
+                    <label for="categoryFilter">
+                        Category
+                    </label>
+
+                    <select id="categoryFilter">
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="Van">Van</option>
+                        <option value="Luxury">Luxury</option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Availability Filter -->
+                <div class="filter-group">
+
+                    <label for="availabilityFilter">
+                        Availability
+                    </label>
+
+                    <select id="availabilityFilter">
+
+                        <option value="">
+                            All Vehicles
+                        </option>
+
+                        <option value="true">
+                            Available
+                        </option>
+
+                        <option value="false">
+                            Unavailable
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Sorting -->
+                <div class="filter-group">
+
+                    <label for="sortFilter">
+                        Sort By
+                    </label>
+
+                    <select id="sortFilter">
+
+                        <option value="id-asc">
+                            ID: Low to High
+                        </option>
+
+                        <option value="id-desc">
+                            ID: High to Low
+                        </option>
+
+                        <option value="brand-asc">
+                            Brand: A to Z
+                        </option>
+
+                        <option value="brand-desc">
+                            Brand: Z to A
+                        </option>
+
+                        <option value="rate-asc">
+                            Price: Low to High
+                        </option>
+
+                        <option value="rate-desc">
+                            Price: High to Low
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Reset Filters -->
+                <button type="button"
+                        id="resetFiltersBtn"
+                        class="cancel-btn">
+                    Reset Filters
+                </button>
+
+            </div>
+
+
+            <!-- Status Message -->
             <p id="statusMessage"
                role="status"
-               aria-live="polite"></p>
+               aria-live="polite">
+            </p>
 
+
+            <!-- Vehicle Table -->
             <div class="table-wrapper">
 
                 <table>
@@ -236,18 +427,66 @@
                     </tr>
                     </thead>
 
-                    <tbody id="vehicleTableBody"></tbody>
+                    <tbody id="vehicleTableBody">
+                    </tbody>
 
                 </table>
 
             </div>
+
+
+            <!-- Day 23 - Pagination -->
+            <div class="pagination-section">
+
+                <div class="pagination-info">
+
+                    <span id="pageInfo">
+                        Page 1 of 1
+                    </span>
+
+                </div>
+
+
+                <div class="pagination-controls">
+
+                    <label for="pageSize">
+                        Rows:
+                    </label>
+
+                    <select id="pageSize">
+
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+
+                    </select>
+
+
+                    <button type="button"
+                            id="prevPageBtn">
+                        Previous
+                    </button>
+
+
+                    <button type="button"
+                            id="nextPageBtn">
+                        Next
+                    </button>
+
+                </div>
+
+            </div>
+
         </section>
 
+
+        <!-- Footer -->
         <footer>
             RentFlow Vehicle Management System
         </footer>
 
     </main>
+
 </div>
 
 </body>

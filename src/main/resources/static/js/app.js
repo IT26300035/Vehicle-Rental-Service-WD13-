@@ -1,6 +1,7 @@
 
-const DEMO_MODE = true;
+/* RENTFLOW - DAY 23 */
 
+const DEMO_MODE = true;
 const API_URL = "/api/vehicles";
 const STORAGE_KEY = "rentflow_demo_vehicles";
 
@@ -34,6 +35,10 @@ const initialVehicles = [
     }
 ];
 
+let vehicles = [];
+let currentPage = 1;
+
+// HTML Elements
 const tableBody = document.getElementById("vehicleTableBody");
 const statusMessage = document.getElementById("statusMessage");
 const refreshBtn = document.getElementById("refreshBtn");
@@ -45,8 +50,18 @@ const formMessage = document.getElementById("formMessage");
 const saveBtn = document.getElementById("saveBtn");
 const cancelBtn = document.getElementById("cancelBtn");
 
-let vehicles = [];
+const searchInput = document.getElementById("searchInput");
+const categoryFilter = document.getElementById("categoryFilter");
+const availabilityFilter = document.getElementById("availabilityFilter");
+const sortFilter = document.getElementById("sortFilter");
+const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 
+const pageSizeInput = document.getElementById("pageSize");
+const pageInfo = document.getElementById("pageInfo");
+const prevPageBtn = document.getElementById("prevPageBtn");
+const nextPageBtn = document.getElementById("nextPageBtn");
+
+// Demo Database
 function loadDemoData() {
     const saved = localStorage.getItem(STORAGE_KEY);
 
@@ -56,7 +71,6 @@ function loadDemoData() {
 
     const data = structuredClone(initialVehicles);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-
     return data;
 }
 
@@ -64,17 +78,18 @@ function saveDemoData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles));
 }
 
+// Backend API Helper
 async function apiRequest(url, options = {}) {
     const response = await fetch(url, options);
 
     if (!response.ok) {
-        let message = `Request failed: ${response.status}`;
+        let message = "Request failed: " + response.status;
 
         try {
             const error = await response.json();
             message = error.message || message;
         } catch (ignored) {
-            // No JSON error response
+            // Response is not JSON
         }
 
         throw new Error(message);
@@ -89,7 +104,7 @@ async function apiRequest(url, options = {}) {
 
 function jsonOptions(method, data) {
     return {
-        method: method,
+        method,
         headers: {
             "Content-Type": "application/json"
         },
@@ -97,24 +112,81 @@ function jsonOptions(method, data) {
     };
 }
 
+// Table Helpers
 function addCell(row, value) {
     const cell = document.createElement("td");
     cell.textContent = value;
     row.appendChild(cell);
-    return cell;
 }
 
 function makeButton(label, className, onClick) {
     const button = document.createElement("button");
-
     button.type = "button";
     button.textContent = label;
     button.className = className;
     button.addEventListener("click", onClick);
-
     return button;
 }
 
+// Day 23 - Search, Filter and Sort
+function getFilteredVehicles() {
+    const keyword = searchInput.value.trim().toLowerCase();
+    const category = categoryFilter.value;
+    const availability = availabilityFilter.value;
+    const sort = sortFilter.value;
+
+    let result = vehicles.filter(vehicle => {
+
+        const searchableText = [
+            vehicle.registrationNumber,
+            vehicle.brand,
+            vehicle.model
+        ].join(" ").toLowerCase();
+
+        const matchesSearch =
+            searchableText.includes(keyword);
+
+        const matchesCategory =
+            category === "" ||
+            vehicle.category === category;
+
+        const matchesAvailability =
+            availability === "" ||
+            String(vehicle.available) === availability;
+
+        return matchesSearch &&
+            matchesCategory &&
+            matchesAvailability;
+    });
+
+    result.sort((a, b) => {
+        switch (sort) {
+            case "id-desc":
+                return b.id - a.id;
+
+            case "brand-asc":
+                return a.brand.localeCompare(b.brand);
+
+            case "brand-desc":
+                return b.brand.localeCompare(a.brand);
+
+            case "rate-asc":
+                return Number(a.dailyRate) -
+                    Number(b.dailyRate);
+
+            case "rate-desc":
+                return Number(b.dailyRate) -
+                    Number(a.dailyRate);
+
+            default:
+                return a.id - b.id;
+        }
+    });
+
+    return result;
+}
+
+// Statistics: all vehicles, not only filtered ones
 function displayStatistics() {
     const total = vehicles.length;
 
@@ -132,20 +204,44 @@ function displayStatistics() {
         total - available;
 }
 
+// Day 23 - Render paginated vehicle list
 function displayVehicles() {
     tableBody.replaceChildren();
 
-    if (vehicles.length === 0) {
-        statusMessage.textContent = "No vehicles found.";
-        displayStatistics();
-        return;
-    }
+    const filtered = getFilteredVehicles();
+    const pageSize = Number(pageSizeInput.value);
 
-    statusMessage.textContent = DEMO_MODE
-        ? "Demo Mode — Changes are saved in this browser."
-        : "";
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filtered.length / pageSize)
+    );
 
-    vehicles.forEach(vehicle => {
+    // Keep current page within valid range
+    currentPage = Math.min(
+        Math.max(currentPage, 1),
+        totalPages
+    );
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const pageVehicles = filtered.slice(
+        startIndex,
+        startIndex + pageSize
+    );
+
+    pageInfo.textContent =
+        `Page ${currentPage} of ${totalPages} ` +
+        `(${filtered.length} matching vehicles)`;
+
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
+
+    statusMessage.textContent = filtered.length === 0
+        ? "No matching vehicles found."
+        : DEMO_MODE
+            ? "Demo Mode — Changes saved in this browser."
+            : "";
+
+    pageVehicles.forEach(vehicle => {
         const row = document.createElement("tr");
 
         addCell(row, vehicle.id);
@@ -174,24 +270,23 @@ function displayVehicles() {
 
         const actionCell = document.createElement("td");
         const actions = document.createElement("div");
-
         actions.className = "action-buttons";
 
         actions.appendChild(
-            makeButton("Edit", "edit-btn", () => {
-                editVehicle(vehicle.id);
-            })
+            makeButton("Edit", "edit-btn", () =>
+                editVehicle(vehicle.id))
         );
 
         actions.appendChild(
-            makeButton("Delete", "delete-btn", () => {
-                deleteVehicle(vehicle.id);
-            })
+            makeButton("Delete", "delete-btn", () =>
+                deleteVehicle(vehicle.id))
         );
 
         actions.appendChild(
             makeButton(
-                vehicle.available ? "Mark Unavailable" : "Mark Available",
+                vehicle.available
+                    ? "Mark Unavailable"
+                    : "Mark Available",
                 "availability-btn",
                 () => toggleAvailability(vehicle.id)
             )
@@ -199,13 +294,13 @@ function displayVehicles() {
 
         actionCell.appendChild(actions);
         row.appendChild(actionCell);
-
         tableBody.appendChild(row);
     });
 
     displayStatistics();
 }
 
+// Load Dashboard
 async function loadDashboard() {
     refreshBtn.disabled = true;
     statusMessage.classList.remove("error");
@@ -221,30 +316,31 @@ async function loadDashboard() {
 
     } catch (error) {
         console.error(error);
-
         statusMessage.textContent = error.message;
         statusMessage.classList.add("error");
-
     } finally {
         refreshBtn.disabled = false;
     }
 }
 
+// Read Add/Edit Form
 function getFormData() {
     return {
-        registrationNumber: document
-            .getElementById("registrationNumber")
-            .value.trim().toUpperCase(),
+        registrationNumber:
+            document.getElementById("registrationNumber")
+                .value.trim().toUpperCase(),
 
-        brand: document.getElementById("brand").value.trim(),
+        brand:
+            document.getElementById("brand").value.trim(),
 
-        model: document.getElementById("model").value.trim(),
+        model:
+            document.getElementById("model").value.trim(),
 
-        category: document.getElementById("category").value,
+        category:
+        document.getElementById("category").value,
 
-        dailyRate: Number(
-            document.getElementById("dailyRate").value
-        ),
+        dailyRate:
+            Number(document.getElementById("dailyRate").value),
 
         available:
             document.getElementById("available").value === "true"
@@ -254,22 +350,20 @@ function getFormData() {
 function resetForm() {
     vehicleForm.reset();
     vehicleIdInput.value = "";
-
     formTitle.textContent = "Add New Vehicle";
     saveBtn.textContent = "Save Vehicle";
-
     formMessage.textContent = "";
     formMessage.className = "form-message";
 }
 
 function showMessage(message, success) {
     formMessage.textContent = message;
-
     formMessage.className = success
         ? "form-message success"
         : "form-message error";
 }
 
+// Day 22 - Add and Update Vehicle
 vehicleForm.addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -277,24 +371,32 @@ vehicleForm.addEventListener("submit", async event => {
     const editingId = vehicleIdInput.value;
     const isEditing = editingId !== "";
 
-    if (!data.registrationNumber || !data.brand ||
-        !data.model || !data.category ||
-        !Number.isFinite(data.dailyRate) ||
-        data.dailyRate < 0.01 ||
-        data.dailyRate > 9999999999.99 ||
-        Math.round(data.dailyRate * 100) !==
-        data.dailyRate * 100) {
+    const rateText =
+        document.getElementById("dailyRate").value.trim();
+
+    const validRate =
+        /^(?:\d{1,10})(?:\.\d{1,2})?$/.test(rateText) &&
+        data.dailyRate >= 0.01;
+
+    if (!data.registrationNumber ||
+        !data.brand ||
+        !data.model ||
+        !data.category ||
+        !validRate) {
 
         showMessage("Please enter valid vehicle details.", false);
         return;
     }
 
+    saveBtn.disabled = true;
+
     try {
         if (DEMO_MODE) {
             const duplicate = vehicles.some(vehicle =>
-                vehicle.registrationNumber ===
+                vehicle.registrationNumber.toUpperCase() ===
                 data.registrationNumber &&
-                (!isEditing || vehicle.id !== Number(editingId))
+                (!isEditing ||
+                    vehicle.id !== Number(editingId))
             );
 
             if (duplicate) {
@@ -316,16 +418,12 @@ vehicleForm.addEventListener("submit", async event => {
                     ...vehicles[index],
                     ...data
                 };
-
             } else {
                 const nextId = vehicles.length > 0
                     ? Math.max(...vehicles.map(v => v.id)) + 1
                     : 1;
 
-                vehicles.push({
-                    id: nextId,
-                    ...data
-                });
+                vehicles.push({ id: nextId, ...data });
             }
 
             saveDemoData();
@@ -351,16 +449,19 @@ vehicleForm.addEventListener("submit", async event => {
         resetForm();
         showMessage(message, true);
 
+        currentPage = 1;
         await loadDashboard();
 
     } catch (error) {
         showMessage(error.message, false);
+    } finally {
+        saveBtn.disabled = false;
     }
 });
 
+// Edit Vehicle
 function editVehicle(id) {
     const vehicle = vehicles.find(v => v.id === id);
-
     if (!vehicle) return;
 
     vehicleIdInput.value = vehicle.id;
@@ -372,19 +473,18 @@ function editVehicle(id) {
     document.getElementById("model").value = vehicle.model;
     document.getElementById("category").value = vehicle.category;
     document.getElementById("dailyRate").value = vehicle.dailyRate;
-
     document.getElementById("available").value =
         String(vehicle.available);
 
     formTitle.textContent = "Edit Vehicle";
     saveBtn.textContent = "Update Vehicle";
-
     formMessage.textContent = "";
 
     document.getElementById("vehicleFormSection")
         .scrollIntoView({ behavior: "smooth" });
 }
 
+// Delete Vehicle
 async function deleteVehicle(id) {
     if (!confirm("Are you sure you want to delete this vehicle?")) {
         return;
@@ -392,7 +492,7 @@ async function deleteVehicle(id) {
 
     try {
         if (DEMO_MODE) {
-            vehicles = vehicles.filter(vehicle => vehicle.id !== id);
+            vehicles = vehicles.filter(v => v.id !== id);
             saveDemoData();
         } else {
             await apiRequest(`${API_URL}/${id}`, {
@@ -411,9 +511,9 @@ async function deleteVehicle(id) {
     }
 }
 
+// Change Availability
 async function toggleAvailability(id) {
     const vehicle = vehicles.find(v => v.id === id);
-
     if (!vehicle) return;
 
     const newStatus = !vehicle.available;
@@ -438,7 +538,45 @@ async function toggleAvailability(id) {
     }
 }
 
+// Day 23 - Filter Events
+function refreshFilteredList() {
+    currentPage = 1;
+    displayVehicles();
+}
+
+searchInput.addEventListener("input", refreshFilteredList);
+categoryFilter.addEventListener("change", refreshFilteredList);
+availabilityFilter.addEventListener("change", refreshFilteredList);
+sortFilter.addEventListener("change", refreshFilteredList);
+pageSizeInput.addEventListener("change", refreshFilteredList);
+
+// Reset Filters
+resetFiltersBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    categoryFilter.value = "";
+    availabilityFilter.value = "";
+    sortFilter.value = "id-asc";
+
+    currentPage = 1;
+    displayVehicles();
+});
+
+// Pagination
+prevPageBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        displayVehicles();
+    }
+});
+
+nextPageBtn.addEventListener("click", () => {
+    currentPage++;
+    displayVehicles();
+});
+
+// Other Events
 cancelBtn.addEventListener("click", resetForm);
 refreshBtn.addEventListener("click", loadDashboard);
 
+// Start Application
 loadDashboard();
